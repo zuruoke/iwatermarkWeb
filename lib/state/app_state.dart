@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,8 @@ const Map<String, String> _headers = {
   'Accept': 'application/json',
   'Content-Type': 'application/json; charset=UTF-8',
 };
+const String api = 'http://3.141.158.159:8181/predict';
+
 const String _maskUrl =
     'https://firebasestorage.googleapis.com/v0/b/atains-app.appspot.com/o/utils%2Fmask.png?alt=media&token=ad4f142a-4dc0-451d-bd9d-2f8d8427e68c';
 
@@ -49,7 +50,7 @@ class AppState with ChangeNotifier {
   Future<void> getPrediction(String uploadImageUrl) async {
     Map<String, String> upload = {'image': uploadImageUrl, 'mask': _maskUrl};
     var _body = jsonEncode(upload);
-    final Uri uri = Uri.parse(dotenv.env['API_URL']!);
+    final Uri uri = Uri.parse(api);
     http.Response response =
         await http.post(uri, headers: _headers, body: _body);
     if (response.statusCode == 200) {
