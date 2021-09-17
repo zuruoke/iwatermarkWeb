@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:iwatermark/helpers/constants.dart';
 import 'package:iwatermark/state/app_state.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:velocity_x/velocity_x.dart';
 
 class Home extends StatefulWidget {
@@ -30,19 +31,14 @@ class _HomeState extends State<Home> {
     }
   }
 
-  _uploadToFirebase() {
+  _uploadAndPredict() {
     final AppState appState = Provider.of<AppState>(context, listen: false);
-    setState(() {
-      _isLoading = true;
-    });
-    appState
-        .uploadImageToFirebaseStorage(_pickedFile!, _filename!)
-        .then((String url) {
-      setState(() {
-        _isLoading = false;
-        print(url);
-      });
-    });
+    appState.uploadAndGetPrediction(_pickedFile!, _filename!);
+  }
+
+  _downloadImage() {
+    final AppState appState = Provider.of<AppState>(context, listen: false);
+    launch(appState.getResponseImage);
   }
 
   _registerButton() {
@@ -106,6 +102,42 @@ class _HomeState extends State<Home> {
     );
   }
 
+  _align() {
+    final AppState appState = Provider.of<AppState>(context);
+    return Align(
+        alignment: Alignment.center,
+        child: appState.isLoading
+            ? Image.asset(
+                'assets/loading-atains.gif',
+                height: 60,
+              )
+            : _textButton(
+                appState.getResponseImage.isNotEmpty
+                    ? 'Download Image'
+                    : 'Remove Watermark',
+                appState.getResponseImage.isNotEmpty
+                    ? _downloadImage
+                    : _uploadAndPredict));
+  }
+
+  _imageDecor() {
+    final AppState appState = Provider.of<AppState>(context);
+    final Size size = MediaQuery.of(context).size;
+    return appState.getResponseImage.isNotEmpty
+        ? Image.network(
+            appState.getResponseImage,
+            fit: BoxFit.fitWidth,
+            height: 0.1 * size.height,
+            width: 0.1 * size.width,
+          )
+        : Image.memory(
+            _pickedFile!,
+            fit: BoxFit.fitWidth,
+            height: 0.1 * size.height,
+            width: 0.1 * size.width,
+          );
+  }
+
   _uploadContainer() {
     final Size size = MediaQuery.of(context).size;
     return Container(
@@ -123,21 +155,7 @@ class _HomeState extends State<Home> {
               width: 0.1 * size.width,
               child: Stack(
                 fit: StackFit.expand,
-                children: [
-                  Image.memory(
-                    _pickedFile!,
-                    fit: BoxFit.fitWidth,
-                    height: 0.1 * size.height,
-                    width: 0.1 * size.width,
-                  ),
-                  Align(
-                      alignment: Alignment.center,
-                      child: _isLoading
-                          ? CircularProgressIndicator.adaptive(
-                              backgroundColor: Colors.pink,
-                            )
-                          : _textButton('Remove Watermark', _uploadToFirebase))
-                ],
+                children: [_imageDecor(), _align()],
               ))
           : Container(
               alignment: Alignment.center,
@@ -238,6 +256,36 @@ class _HomeState extends State<Home> {
           ),
           Image.asset(
             'assets/output1.png',
+            height: 0.5 * size.height,
+            width: 0.5 * size.width,
+          ),
+          Image.asset(
+            'assets/output3_1.jpeg',
+            height: 0.5 * size.height,
+            width: 0.5 * size.width,
+          ),
+          Image.asset(
+            'assets/output3.png',
+            height: 0.5 * size.height,
+            width: 0.5 * size.width,
+          ),
+          Image.asset(
+            'assets/output_4.jpeg',
+            height: 0.5 * size.height,
+            width: 0.5 * size.width,
+          ),
+          Image.asset(
+            'assets/output_4_1.png',
+            height: 0.5 * size.height,
+            width: 0.5 * size.width,
+          ),
+          Image.asset(
+            'assets/output_5.jpeg',
+            height: 0.5 * size.height,
+            width: 0.5 * size.width,
+          ),
+          Image.asset(
+            'assets/output_5_1.png',
             height: 0.5 * size.height,
             width: 0.5 * size.width,
           )
